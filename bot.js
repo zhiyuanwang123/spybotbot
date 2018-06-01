@@ -1,4 +1,3 @@
-const botsetting = require("./botsetting.json");
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
