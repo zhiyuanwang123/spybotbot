@@ -26,6 +26,7 @@ client.on('message', msg => {
   if (command === "!mute") {
     if (!msg.member.hasPermission("MANAGE_MESSAGES")) return msg.reply("You don't have permissions");
     let tomute = msg.guild.members.get(msg.mentions.users.first().id) || msg.guild.members.get(args[0]);
+    console.log(tomute);
     if (!tomute) return msg.reply("Please specify a user");
     msg.channel.overwritePermissions(tomute, {
       SEND_MESSAGES: false,
