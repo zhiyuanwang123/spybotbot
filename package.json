@@ -1,0 +1,12 @@
+{
+  "name": "spygame",
+  "version": "0.0.1",
+  "description": "Spy game robot test",
+  "main": "bot.js",
+  "dependencies": {
+    "discord.js": "^11.3.2"
+  },
+  "devDependencies": {},
+  "author": "Zavins",
+  "license": "ISC"
+}
