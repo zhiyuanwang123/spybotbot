@@ -23,6 +23,9 @@ client.on('message', msg => {
   if (msg.content === 'ping') {
     msg.channel.sendMessage("Hi, Wanna play Who is Undercover?");
   }
+  if (msg.content === 'cennie') {
+    msg.channel.sendMessage("She is sooo stupid");
+  }
   if (command === "!mute") {
     if (!msg.member.hasPermission("MANAGE_MESSAGES")) return msg.reply("You don't have permissions");
     let tomute = msg.guild.members.get(msg.mentions.users.first().id) || msg.guild.members.get(args[0]);
