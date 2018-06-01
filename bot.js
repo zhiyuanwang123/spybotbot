@@ -65,5 +65,4 @@ if (command === "!cover") {
   }
   return
 });
-
-client.login('NDUxNTU2MTkwMTc0ODM4Nzg2.DfIJOA.KDNDCCpzyM8ZteVLbk6tWPT-ppE');
+client.login(process.env.BOT_TOKEN);
