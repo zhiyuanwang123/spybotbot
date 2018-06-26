@@ -533,6 +533,22 @@ async function jinyanall(channel, guildidd, members){
   return;
 }
 
+async function theunmuteall(channel, guildidd, members){
+  if (configgame[guildidd] != null){
+    if(configgame[guildidd].created == true && fs.existsSync(`./${guildidd}.json`)){
+      let gamedata = await readjson(`./${guildidd}.json`);
+      for(i = 0; i<configgame[guildidd].playernumber; i++){
+        let tomute = await members.get(gamedata[`player${i+1}`].player);
+        if (tomute){
+          await channel.overwritePermissions(tomute, {SEND_MESSAGES: null});
+        }
+      }
+    }
+  }
+  return;
+}
+
+
 async function unjinyanall(channel, guildidd, members){
   if (configgame[guildidd] != null){
     if(configgame[guildidd].created == true && fs.existsSync(`./${guildidd}.json`)){
@@ -786,6 +802,7 @@ async function killperson(channel, guildida, members){
     await writejson(`./${guildida}.json`,jsonsq);
     if(gamedata[`player${kill}`].isspy == "true"){
       channel.send("Game ended, citizen wins the game!");
+      await themuteall(channel, guildida, members);
       return;
     }else{
       if (configgame[guildida].onsurvive > 3){
@@ -793,7 +810,8 @@ async function killperson(channel, guildida, members){
         await playertalk(channel, guildida, members);
         return;
       }else{
-        channel.send("Spy wins the game because only 3 players left!");
+        await channel.send("Spy wins the game because only 3 players left!");
+        await themuteall(channel, guildida, members);
         return;
       }
     }
