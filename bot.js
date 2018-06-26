@@ -521,9 +521,11 @@ async function jinyanall(channel, guildidd, members){
     if(configgame[guildidd].created == true && fs.existsSync(`./${guildidd}.json`)){
       let gamedata = await readjson(`./${guildidd}.json`);
       for(i = 0; i<configgame[guildidd].playernumber; i++){
-        let tomute = await members.get(gamedata[`player${i+1}`].player);
-        if (tomute){
-          await channel.overwritePermissions(tomute, {SEND_MESSAGES: false});
+        if (gamedata[`player${i+1}`].out != "true"){
+          let tomute = await members.get(gamedata[`player${i+1}`].player);
+          if (tomute){
+            await channel.overwritePermissions(tomute, {SEND_MESSAGES: false});
+          }
         }
       }
     }
@@ -536,9 +538,11 @@ async function unjinyanall(channel, guildidd, members){
     if(configgame[guildidd].created == true && fs.existsSync(`./${guildidd}.json`)){
       let gamedata = await readjson(`./${guildidd}.json`);
       for(i = 0; i<configgame[guildidd].playernumber; i++){
-        let tomute = await members.get(gamedata[`player${i+1}`].player);
-        if (tomute){
-          await channel.overwritePermissions(tomute, {SEND_MESSAGES: null});
+        if (gamedata[`player${i+1}`].out != "true"){
+          let tomute = await members.get(gamedata[`player${i+1}`].player);
+          if (tomute){
+            await channel.overwritePermissions(tomute, {SEND_MESSAGES: null});
+          }
         }
       }
     }
