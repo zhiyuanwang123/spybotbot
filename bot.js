@@ -666,7 +666,7 @@ async function restart(channel, guildids, members){
         gamestarted: configgame[guildids].gamestarted,
         created: configgame[guildids].created,
         ontalk: configgame[guildids].ontalk + 1 ,
-        onsurvive: configgame[guildids].playernumber,
+        onsurvive: configgame[guildids].onsurvive,
         round: configgame[guildids].round
       }
       let jsonsa = await JSON.stringify(configgame,null,4);
@@ -695,7 +695,7 @@ async function restart(channel, guildids, members){
       gamestarted: configgame[guildids].gamestarted,
       created: configgame[guildids].created,
       ontalk: configgame[guildids].ontalk + 1 ,
-      onsurvive: configgame[guildids].playernumber,
+      onsurvive: configgame[guildids].onsurvive,
       round: configgame[guildids].round
     }
     let jsonsa = await JSON.stringify(configgame,null,4);
@@ -748,7 +748,7 @@ async function killperson(channel, guildida, members){
       gamestarted: configgame[guildida].gamestarted,
       created: configgame[guildida].created,
       ontalk: configgame[guildida].ontalk,
-      onsurvive: configgame[guildida].playernumber,
+      onsurvive: configgame[guildida].onsurvive,
       round: configgame[guildida].round + 1
     }
     let jsonsa = await JSON.stringify(configgame,null,4);
