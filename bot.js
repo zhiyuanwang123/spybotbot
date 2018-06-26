@@ -773,7 +773,7 @@ async function killperson(channel, guildida, members){
     }
     let jsonsa = await JSON.stringify(configgame,null,4);
     await writejson(`./gameconfig.json`,jsonsa);
-    channel.send("No one outed, game continued!");
+    await channel.send("No one outed, game continued!");
     await playertalk(channel, guildida, members);
     return;
   }else if(ex > 0 && kill){
