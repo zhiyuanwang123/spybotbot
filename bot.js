@@ -801,12 +801,12 @@ async function killperson(channel, guildida, members){
     let jsonsq = await JSON.stringify(gamedata,null,4);
     await writejson(`./${guildida}.json`,jsonsq);
     if(gamedata[`player${kill}`].isspy == "true"){
-      channel.send("Game ended, citizen wins the game!");
+      await channel.send("Game ended, citizen wins the game!");
       await theunmuteall(channel, guildida, members);
       return;
     }else{
       if (configgame[guildida].onsurvive > 3){
-        channel.send("Game continued!");
+        await channel.send("Game continued!");
         await playertalk(channel, guildida, members);
         return;
       }else{
