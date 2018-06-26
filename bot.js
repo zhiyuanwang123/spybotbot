@@ -814,6 +814,7 @@ async function startvote(channel,guildida, members){
   }
   await channel.send(embed);
   let totalvote = 0;
+  let round = configgame[guildida].round;
   await channel.awaitMessages(async function(msg){
     if (msg.author.id == client.user.id) return;
     let themsg = await msg.content.toLowerCase();
@@ -854,7 +855,7 @@ async function startvote(channel,guildida, members){
             await channel.send(embed);
             //end set embed
 
-            if(totalvote === configgame[guildida].onsurvive){
+            if(totalvote === configgame[guildida].onsurvive && round === configgame[guildida].round){
               await killperson(channel, guildida, members);
               return;
             }
@@ -872,7 +873,7 @@ async function startvote(channel,guildida, members){
       }
     }
   }, {time: 60000});
-  if(totalvote < configgame[guildida].onsurvive){
+  if(totalvote < configgame[guildida].onsurvive && round === configgame[guildida].round){
     await killperson(channel, guildida, members);
     return;
   }
