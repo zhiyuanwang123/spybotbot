@@ -574,10 +574,10 @@ async function playertalk(channel, guildids, members){
           console.log("round+1");
           await sendreview(channel, guildids);
           await unjinyanall(channel,guildids,members);
-          await channel.send("Voting will start in 20 seconds!");
+          await channel.send("Chatting time and voting will start in 60 seconds!");
           await setTimeout(async function() {
             await startvote(channel, guildids, members);
-          }, 20000);
+          }, 60000);
         }
       }else{
         console.log("Spy win!")
