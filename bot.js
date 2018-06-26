@@ -802,7 +802,7 @@ async function killperson(channel, guildida, members){
     await writejson(`./${guildida}.json`,jsonsq);
     if(gamedata[`player${kill}`].isspy == "true"){
       channel.send("Game ended, citizen wins the game!");
-      await themuteall(channel, guildida, members);
+      await theunmuteall(channel, guildida, members);
       return;
     }else{
       if (configgame[guildida].onsurvive > 3){
@@ -811,7 +811,7 @@ async function killperson(channel, guildida, members){
         return;
       }else{
         await channel.send("Spy wins the game because only 3 players left!");
-        await themuteall(channel, guildida, members);
+        await theunmuteall(channel, guildida, members);
         return;
       }
     }
