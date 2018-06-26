@@ -747,7 +747,7 @@ async function killperson(channel, guildida, members){
       playernumber: configgame[guildida].playernumber,
       gamestarted: configgame[guildida].gamestarted,
       created: configgame[guildida].created,
-      ontalk: configgame[guildida].ontalk,
+      ontalk: 0,
       onsurvive: configgame[guildida].onsurvive,
       round: configgame[guildida].round + 1
     }
