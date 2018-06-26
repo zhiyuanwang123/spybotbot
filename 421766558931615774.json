@@ -1,0 +1,38 @@
+{
+    "player1": {
+        "player": "392512313036505101",
+        "playername": "Zavins",
+        "role": "owner",
+        "word": "Entrance",
+        "isspy": "false",
+        "out": "false",
+        "votes": 0
+    },
+    "player2": {
+        "player": "368238580054753280",
+        "playername": "LearnToHackGT",
+        "role": "member",
+        "word": "Entrance",
+        "isspy": "false",
+        "out": "false",
+        "votes": 0
+    },
+    "player3": {
+        "player": "459881283112271892",
+        "playername": "SpyTester",
+        "role": "member",
+        "word": "Entrance",
+        "isspy": "false",
+        "out": "false",
+        "votes": 0
+    },
+    "player4": {
+        "player": "421858429406281738",
+        "playername": "Seh",
+        "role": "member",
+        "word": "Door",
+        "isspy": "true",
+        "out": "true",
+        "votes": 0
+    }
+}

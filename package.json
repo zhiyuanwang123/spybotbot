@@ -4,7 +4,9 @@
   "description": "Spy game robot test",
   "main": "bot.js",
   "dependencies": {
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "nodemon": "^1.17.5",
+    "request": "^2.87.0"
   },
   "devDependencies": {},
   "author": "Zavins",
