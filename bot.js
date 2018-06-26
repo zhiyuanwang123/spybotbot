@@ -880,4 +880,4 @@ async function startvote(channel,guildida, members){
 }
 
 
-client.login(botsetting.token);
+client.login(BOT_TOKEN);
