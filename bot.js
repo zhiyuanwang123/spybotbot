@@ -763,7 +763,7 @@ async function killperson(channel, guildida, members){
       gamestarted: configgame[guildida].gamestarted,
       created: configgame[guildida].created,
       ontalk: 0,
-      onsurvive: configgame[guildida].playernumber - 1,
+      onsurvive: configgame[guildida].onsurvive - 1,
       round: configgame[guildida].round + 1
     }
     let jsonsa = await JSON.stringify(configgame,null,4);
