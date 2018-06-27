@@ -1,0 +1,18 @@
+:spy: Who is Undercover  - The Board Game :gun:
+
+"A spying spy may spy on spies but the spy that spies best is a spy above the rest."- qoute (possibly mangled) from an old spymaster whose name is long lost.
+If you think you are a spy, your mission is to survive as long as you can. Don't get catched by the citizens!
+If you think you are a citizen, your mission is to find out the spy and to catch him! Don't hurt your teammates!
+
+-Each player will be given a "word". Except one player who we will refer  "the undercover(spy)", all the other players will have the same "word". And the undercover(spy) will have a different "word" from the others, but his/her "word" would be someway related to the "word" which other players got.
+
+-Each round, all players should take turns to give a line to describe his/her given "word". You should try your best to give your allies hints while you should hide it from the undercover(spy).
+
+-After each round, all players have to vote, to pick out the one you believed that is most likely to be the undercover(spy). Whoever got the most votes will be killed (gets to leave).
+
+-Game continues until the undercover(spy) gets killed(get the most vote), then the citizens win the game.
+
+-If the undercover(spy) stays until the last round (3 players left), that means the undercover(spy) wins.
+
+Have Fun,
+Zavins
