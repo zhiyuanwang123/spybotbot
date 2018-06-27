@@ -6,6 +6,7 @@ const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const fs = require("fs");
 const configgame = require("./gameconfig");
 const request = require("request");
+const rule = fs.readFileSync("./rule.txt").toString();
 var info;
 
 
@@ -18,6 +19,22 @@ client.on('ready', async () => {
   } catch(a){
     console.log(a.stack)
   }
+  return;
+});
+
+client.on("guildMemberAdd",async function (user){
+  let guild = user.guild;
+  let role;
+  role = await guild.roles.find(r => r.name === "None-Players");
+  if (!role){
+    role = await guild.createRole({
+      name: "None-Players",
+      color: "#000000",
+      permissions: ['SEND_MESSAGES']
+    });
+  }
+  await user.addRole(role);
+  console.log("New Member Added!");
   return;
 });
 
@@ -35,6 +52,10 @@ client.on('message', async (msg) => {
     if (msg.content.toLowerCase() === 'game') {
       await msg.channel.send('Send [Create Game] to Create a game');
       await msg.delete(1);
+    }
+
+    if (msg.content.toLowerCase() === "rule" || msg.content.toLowerCase() === "gamerule"|| msg.content.toLowerCase() === "game rule"){
+      msg.reply("\n"+rule);
     }
 
     if (msg.content.toLowerCase() === "create game" || msg.content.toLowerCase() === "creategame"){
@@ -159,6 +180,7 @@ client.on('message', async (msg) => {
     if (msg.content.toLowerCase() === "delete" || msg.content.toLowerCase() === "deletegame" || msg.content.toLowerCase() === "delete game"){
       if (msg.member.hasPermission("ADMINISTRATOR")){
         if(fs.existsSync(`./${msg.guild.id}.json`)){
+          await theunmuteall(msg.channel, msg.guild.id, msg.guild.members);
           await unjinyanall(msg.channel, msg.guild.id, msg.guild.members);
           fs.unlink(`./${msg.guild.id}.json`, function (err) {
             if(err){
@@ -180,7 +202,7 @@ client.on('message', async (msg) => {
       }
     }
 
-    if (msg.content.toLowerCase() === "start" || msg.content.toLowerCase() === "startgame" || msg.content.toLowerCase() === "start game"){
+    if (msg.content.toLowerCase() === "restart" || msg.content.toLowerCase() === "start" || msg.content.toLowerCase() === "startgame" || msg.content.toLowerCase() === "start game"){
       if (configgame[msg.guild.id] != null){
         if(configgame[msg.guild.id].created == true && fs.existsSync(`./${msg.guild.id}.json`)){
           if (configgame[msg.guild.id].playernumber < 4){
@@ -188,6 +210,7 @@ client.on('message', async (msg) => {
             await msg.delete();
             return;
           }
+          if (configgame[msg.guild.id].gamestarted == true && msg.content.toLocaleLowerCase() != "restart") return await msg.reply("There is already a game started!");
           let gamedata = await readjson(`./${msg.guild.id}.json`);
           if(msg.author.id == gamedata["player1"].player || msg.member.hasPermission("ADMINISTRATOR")){
            
@@ -197,7 +220,7 @@ client.on('message', async (msg) => {
             let fetched = await msg.channel.fetchMessages();
             await msg.channel.bulkDelete(fetched,true);
             await cleanchat(msg.channel);
-            await msg.channel.send("Preparing the game!");
+            await msg.channel.send("Preparing the game! :video_game:");
             await startgame(guildid,msg.channel.id);
 
             let state = await getword();
@@ -206,22 +229,21 @@ client.on('message', async (msg) => {
             
             await setallword(guildid, state[0], state[1]);
 
-            await msg.channel.send("Loading...");
+            await msg.channel.send(":traffic_light: Loading...");
 
             //await muteall(msg.channel,guildid,msg.guild.members);
 
-            await msg.channel.send("Sending the word!");
             await sendwordout(msg.channel,guildid,msg.guild.members);
 
 
-            await msg.channel.send("The word is in the DM(Private Chat) Server!");
+            await msg.channel.send("The word is in the DM(Private Chat) Server! :desktop:");
 
 
             //await unmuteall(msg.channel,guildid,msg.guild.members);
-            await msg.channel.send("Game will start in 10 second!");
+            await msg.channel.send("Game will start in 10 second!\n⁣⁣⁣⁣　\n⁣⁣⁣⁣　\n⁣⁣⁣⁣　");
             await jinyanall(msg.channel,guildid,msg.guild.members);
             await setTimeout(async function() {
-              await playertalk(msg.channel,guildid,msg.guild.members);
+              await playertalk(msg.channel,guildid,msg.guild.members,configgame[guildid].createtime);
             }, 10000);
 
             //await startvote(msg.channel,msg.guild.id);
@@ -313,11 +335,12 @@ async function startgame(guildid,channelid){
     if(configgame[guildid].created == true && fs.existsSync(`./${guildid}.json`)){
 
       let gamedata = await readjson(`./${guildid}.json`);
-
+      let theguild = await client.guilds.get(guildid);
       configgame[guildid] = {
         playernumber: configgame[guildid].playernumber,
         gamestarted: true,
         created: configgame[guildid].created,
+        createtime: new Date().toLocaleTimeString(),
         ontalk: 0,
         onsurvive: configgame[guildid].playernumber,
         round: 0,
@@ -327,6 +350,23 @@ async function startgame(guildid,channelid){
             throw err;
         }
       });
+      let role;
+      role = await theguild.roles.find(r => r.name === "None-Players");
+      if (role){
+        await role.edit({ permissions: []});
+      }else{
+        console.log("Set Role Up!");
+      }
+
+      let inplayer = await theguild.roles.find(r => r.name === "Players");
+      if (!inplayer){
+        inplayer = await theguild.createRole({
+          name: "Players",
+          color: "#8A2BE2",
+          permissions: ['SEND_MESSAGES']
+        });
+      }
+
       for (i = 0; i < configgame[guildid].playernumber; i++) {
         gamedata[`player${i+1}`] = {
           player: gamedata[`player${i+1}`].player,
@@ -339,7 +379,10 @@ async function startgame(guildid,channelid){
         }
         let jsonsa = await JSON.stringify(gamedata,null,4);
         await writejson(`./${guildid}.json`,jsonsa);
-        console.log("+1player");
+        let theplayer = await theguild.members.get(gamedata[`player${i+1}`].player);
+        await theplayer.removeRole(role);
+        await theplayer.addRole(inplayer);
+        await console.log("+1player");
       }
       return;
     }else{
@@ -348,7 +391,6 @@ async function startgame(guildid,channelid){
   }else{
     return "error";
   }
-
 }
 
 
@@ -363,6 +405,7 @@ async function sendwordpic(word,dmplayer){
       await dmplayer.send(text);
       await dmplayer.send("Please remember your word and keep it secret!");
       await dmplayer.send({file:body});
+      await dmplayer.send("Back to the channel after checking the word!");
     }
   });
   return;
@@ -452,6 +495,7 @@ async function getword(){
   if (fs.existsSync("wordspackage.json")){
     let worddata = await readjson("wordspackage.json");
     let suo = await getRandomInt(40);
+    console.log(`Import word${suo}`)
     let yin = await getRandomInt(2);
     if (yin == 1){
       let normal = worddata[`word${suo}`].a;
@@ -534,6 +578,14 @@ async function jinyanall(channel, guildidd, members){
 }
 
 async function theunmuteall(channel, guildidd, members){
+  let theguild = await client.guilds.get(guildidd);
+  let role = await theguild.roles.find(r => r.name === "None-Players");
+  if (role){
+    await role.edit({ permissions: ["SEND_MESSAGES"]});
+  }else{
+    console.log("Set Role Up!");
+  }
+  let inplay = await theguild.roles.find(r => r.name === "Players");
   if (configgame[guildidd] != null){
     if(configgame[guildidd].created == true && fs.existsSync(`./${guildidd}.json`)){
       let gamedata = await readjson(`./${guildidd}.json`);
@@ -541,6 +593,8 @@ async function theunmuteall(channel, guildidd, members){
         let tomute = await members.get(gamedata[`player${i+1}`].player);
         if (tomute){
           await channel.overwritePermissions(tomute, {SEND_MESSAGES: null});
+          await tomute.removeRole(inplay);
+          await tomute.addRole(role);
         }
       }
     }
@@ -578,30 +632,33 @@ async function sendwordout(channel, guildidd, members){
       }
     }
   }
+  return;
 }
 
 
-async function playertalk(channel, guildids, members){
+async function playertalk(channel, guildids, members, createtime){
   if (configgame[guildids]!= null){
     if(configgame[guildids].created == true && fs.existsSync(`./${guildids}.json`)){
-      console.log(configgame[guildids].onsurvive);
-      if(configgame[guildids].onsurvive > 3){
-        if(configgame[guildids].ontalk != configgame[guildids].playernumber){
-          console.log("gamestarted!");
-          await jinyanall(channel,guildids,members);
-          await restart(channel, guildids, members);
+      console.log(createtime);
+      if(configgame[guildids].createtime == createtime){
+        console.log(configgame[guildids].onsurvive);
+        if(configgame[guildids].onsurvive > 3){
+          if(configgame[guildids].ontalk != configgame[guildids].playernumber){
+            await jinyanall(channel,guildids,members);
+            await restart(channel, guildids, members,createtime);
+          }else{
+            await sendreview(channel, guildids,createtime);
+            await unjinyanall(channel,guildids,members);
+            await channel.send("Chatting time and voting will start in 60 seconds!");
+            await setTimeout(async function() {
+              await startvote(channel, guildids, members,createtime);
+            }, 60000);
+          }
         }else{
-          console.log("round+1");
-          await sendreview(channel, guildids);
-          await unjinyanall(channel,guildids,members);
-          await channel.send("Chatting time and voting will start in 60 seconds!");
-          await setTimeout(async function() {
-            await startvote(channel, guildids, members);
-          }, 60000);
+          console.log("Spy win!");
         }
-      }else{
-        console.log("Spy win!")
       }
+      
     }
   }
   return
@@ -609,7 +666,8 @@ async function playertalk(channel, guildids, members){
 
 
 
-async function sendreview(channel, guildida){
+async function sendreview(channel, guildida,createtime){
+  if(configgame[guildida].createtime != createtime) return;
   let gamedata = await readjson(`./${guildida}.json`);
   let embed = await new Discord.RichEmbed()
   .setTitle("--Discription Review--")
@@ -628,32 +686,38 @@ async function sendreview(channel, guildida){
 
 
 
-async function restart(channel, guildids, members){
-  let gamedata = await readjson(`./${guildids}.json`);
+async function restart(channel, guildids, members, createtime){
+  if(configgame[guildids].createtime == createtime){
+    let gamedata = await readjson(`./${guildids}.json`);
     let ontalk = configgame[guildids].ontalk + 1;
-    if (gamedata[`player${ontalk}`].out != "true"){
-    let tomute = await members.get(gamedata[`player${ontalk}`].player);
-    let talkname = gamedata[`player${ontalk}`].playername
-    if (tomute){
-      await channel.overwritePermissions(tomute, {SEND_MESSAGES: null});
-    }
-    await channel.send(`Player${ontalk} [${talkname}] is describing the word(30 sec)...`);
-    await channel.awaitMessages(async function(msg){
-      if(msg.author.id == gamedata[`player${ontalk}`].player && configgame[guildids].ontalk+1 == ontalk){
-        let themsg = await msg.content.toLowerCase();
-        if (themsg.search(gamedata[`player${ontalk}`].word.toLowerCase()) == -1){
-          await console.log("hello");
-          configgame[guildids] = {
-            playernumber: configgame[guildids].playernumber,
-            gamestarted: configgame[guildids].gamestarted,
-            created: configgame[guildids].created,
-            ontalk: configgame[guildids].ontalk + 1 ,
-            onsurvive: configgame[guildids].onsurvive,
-            round: configgame[guildids].round
-          }
-          let jsonsa = await JSON.stringify(configgame,null,4);
-          await writejson(`./gameconfig.json`,jsonsa);
-          gamedata[`player${ontalk}`] = {
+    if (gamedata[`player${ontalk}`].out != "true" && configgame[guildids].createtime == createtime){
+      let tomute = await members.get(gamedata[`player${ontalk}`].player);
+      let talkname = gamedata[`player${ontalk}`].playername
+      if (tomute){
+        await channel.overwritePermissions(tomute, {SEND_MESSAGES: null});
+      }
+      await channel.send(`Player${ontalk} [${talkname}] is describing the word(30 sec)...`);
+      await channel.awaitMessages(async function(msg){
+        if(msg.author.id == gamedata[`player${ontalk}`].player && configgame[guildids].ontalk+1 == ontalk){
+          let themsg = await msg.content.toLowerCase();
+          if (themsg.search(gamedata[`player${ontalk}`].word.toLowerCase()) == -1){
+            if(themsg === "showlist" || themsg === "list" || themsg === "show list" || 
+            themsg === "creategame" || themsg === "create game" || themsg === "join" || 
+            themsg === "joingame" || themsg === "join game" || themsg === "start" || themsg === "restart" ||
+            themsg === "startgame" || themsg === "delete" || themsg === "delete game" || themsg === "deletegame" ||
+            themsg === "start game" || themsg.search("!") === 0) return;
+            configgame[guildids] = {
+              playernumber: configgame[guildids].playernumber,
+              gamestarted: configgame[guildids].gamestarted,
+              created: configgame[guildids].created,
+              createtime: configgame[guildids].createtime,
+              ontalk: configgame[guildids].ontalk + 1 ,
+              onsurvive: configgame[guildids].onsurvive,
+              round: configgame[guildids].round
+            }
+            let jsonsa = await JSON.stringify(configgame,null,4);
+            await writejson(`./gameconfig.json`,jsonsa);
+            gamedata[`player${ontalk}`] = {
               player: gamedata[`player${ontalk}`].player,
               playername: gamedata[`player${ontalk}`].playername,
               role: gamedata[`player${ontalk}`].role,
@@ -662,71 +726,76 @@ async function restart(channel, guildids, members){
               out: gamedata[`player${ontalk}`].out,
               votes: gamedata[`player${ontalk}`].votes,
               discription: msg.content
+            }
+            let jsonga = await JSON.stringify(gamedata,null,4);
+            await writejson(`./${guildids}.json`,jsonga);
+            await channel.overwritePermissions(tomute, {SEND_MESSAGES: false});
+            await playertalk(channel, guildids, members,createtime);
+            return;
+          }else{
+            let user = await members.get(msg.author.id);;
+            await msg.delete();
+            await user.send("Warning: Illegal Description!");
+            return;
           }
-          let jsonga = await JSON.stringify(gamedata,null,4);
-          await writejson(`./${guildids}.json`,jsonga);
-          await channel.overwritePermissions(tomute, {SEND_MESSAGES: false});
-          await playertalk(channel, guildids, members);
-          return;
         }else{
-          let user = await members.get(msg.author.id);;
-          await msg.delete();
-          await user.send("Warning: Illegal Description!");
           return;
         }
-      }else{
+      },{time: 30000});
+      if(configgame[guildids].ontalk+1 == ontalk && configgame[guildids].createtime == createtime){
+        await console.log("R.I.P skiped");
+        await channel.send(`Player${ontalk} [${talkname}] did not talk!`);
+        configgame[guildids] = {
+          playernumber: configgame[guildids].playernumber,
+          gamestarted: configgame[guildids].gamestarted,
+          created: configgame[guildids].created,
+          createtime:configgame[guildids].createtime,
+          ontalk: configgame[guildids].ontalk + 1 ,
+          onsurvive: configgame[guildids].onsurvive,
+          round: configgame[guildids].round
+        }
+        let jsonsa = await JSON.stringify(configgame,null,4);
+        await writejson(`./gameconfig.json`,jsonsa);
+        gamedata[`player${ontalk}`] = {
+          player: gamedata[`player${ontalk}`].player,
+          playername: gamedata[`player${ontalk}`].playername,
+          role: gamedata[`player${ontalk}`].role,
+          word: gamedata[`player${ontalk}`].word,
+          isspy: gamedata[`player${ontalk}`].isspy,
+          out: gamedata[`player${ontalk}`].out,
+          votes: gamedata[`player${ontalk}`].votes,
+          discription: `× Player${ontalk} did not talk! ×`
+        }
+        let jsonga = await JSON.stringify(gamedata,null,4);
+        await writejson(`./${guildids}.json`,jsonga);
+        await channel.overwritePermissions(tomute, {SEND_MESSAGES: false});
+        await playertalk(channel, guildids, members, createtime);
         return;
-      }
-    },{time: 30000});
-    if(configgame[guildids].ontalk+1 == ontalk){
-      await console.log("R.I.P skiped");
-      await channel.send(`Player${ontalk} [${talkname}] did not talk!`);
+      }else{
+        return
+      }   
+    }else{
       configgame[guildids] = {
         playernumber: configgame[guildids].playernumber,
         gamestarted: configgame[guildids].gamestarted,
         created: configgame[guildids].created,
+        createtime: configgame[guildids].createtime,
         ontalk: configgame[guildids].ontalk + 1 ,
         onsurvive: configgame[guildids].onsurvive,
         round: configgame[guildids].round
       }
       let jsonsa = await JSON.stringify(configgame,null,4);
       await writejson(`./gameconfig.json`,jsonsa);
-      gamedata[`player${ontalk}`] = {
-        player: gamedata[`player${ontalk}`].player,
-        playername: gamedata[`player${ontalk}`].playername,
-        role: gamedata[`player${ontalk}`].role,
-        word: gamedata[`player${ontalk}`].word,
-        isspy: gamedata[`player${ontalk}`].isspy,
-        out: gamedata[`player${ontalk}`].out,
-        votes: gamedata[`player${ontalk}`].votes,
-        discription: `× Player${ontalk} did not talk! ×`
-      }
-      let jsonga = await JSON.stringify(gamedata,null,4);
-      await writejson(`./${guildids}.json`,jsonga);
-      await channel.overwritePermissions(tomute, {SEND_MESSAGES: false});
-      await playertalk(channel, guildids, members);
-      return;
-    }else{
-      return
-    }   
-  } else{
-    configgame[guildids] = {
-      playernumber: configgame[guildids].playernumber,
-      gamestarted: configgame[guildids].gamestarted,
-      created: configgame[guildids].created,
-      ontalk: configgame[guildids].ontalk + 1 ,
-      onsurvive: configgame[guildids].onsurvive,
-      round: configgame[guildids].round
+      await playertalk(channel, guildids, members, createtime);
     }
-    let jsonsa = await JSON.stringify(configgame,null,4);
-    await writejson(`./gameconfig.json`,jsonsa);
-    await playertalk(channel, guildids, members);
+    return;
   }
 }
 
 
 
-async function killperson(channel, guildida, members){
+async function killperson(channel, guildida, members,createtime){
+  if(configgame[guildida].createtime != createtime) return;
   let gamedata = await readjson(`./${guildida}.json`);
   let ex = 0;
   let same = 0;
@@ -767,6 +836,7 @@ async function killperson(channel, guildida, members){
       playernumber: configgame[guildida].playernumber,
       gamestarted: configgame[guildida].gamestarted,
       created: configgame[guildida].created,
+      createtime: configgame[guildida].createtime,
       ontalk: 0,
       onsurvive: configgame[guildida].onsurvive,
       round: configgame[guildida].round + 1
@@ -774,7 +844,7 @@ async function killperson(channel, guildida, members){
     let jsonsa = await JSON.stringify(configgame,null,4);
     await writejson(`./gameconfig.json`,jsonsa);
     await channel.send("No one outed, game continued!");
-    await playertalk(channel, guildida, members);
+    await playertalk(channel, guildida, members,createtime);
     return;
   }else if(ex > 0 && kill){
     await channel.send(`Player${kill}[${gamedata[`player${kill}`].playername}] is killed!😭`);
@@ -782,6 +852,7 @@ async function killperson(channel, guildida, members){
       playernumber: configgame[guildida].playernumber,
       gamestarted: configgame[guildida].gamestarted,
       created: configgame[guildida].created,
+      createtime:configgame[guildida].createtime,
       ontalk: 0,
       onsurvive: configgame[guildida].onsurvive - 1,
       round: configgame[guildida].round + 1
@@ -801,16 +872,17 @@ async function killperson(channel, guildida, members){
     let jsonsq = await JSON.stringify(gamedata,null,4);
     await writejson(`./${guildida}.json`,jsonsq);
     if(gamedata[`player${kill}`].isspy == "true"){
-      await channel.send("Game ended, citizen wins the game!");
+      await channel.send(`Game ended, player${kill} is a spy, :man_in_tuxedo: citizens win the game!`);
       await theunmuteall(channel, guildida, members);
+
       return;
     }else{
       if (configgame[guildida].onsurvive > 3){
         await channel.send("Game continued!");
-        await playertalk(channel, guildida, members);
+        await playertalk(channel, guildida, members, createtime);
         return;
       }else{
-        await channel.send("Spy wins the game because only 3 players left!");
+        await channel.send("Game ended, :spy: spy wins the game!(spy survived!)");
         await theunmuteall(channel, guildida, members);
         return;
       }
@@ -820,7 +892,8 @@ async function killperson(channel, guildida, members){
 }
 
 
-async function startvote(channel,guildida, members){
+async function startvote(channel,guildida, members,creattime){
+  if(configgame[guildida].createtime != creattime) return;
   await channel.send("Starting to vote! Vote the player that you think is a spy(60 sec)!");
   let gamedata = await readjson(`./${guildida}.json`);
   let embed = await new Discord.RichEmbed()
@@ -837,6 +910,7 @@ async function startvote(channel,guildida, members){
   await channel.send(embed);
   let totalvote = 0;
   let round = configgame[guildida].round;
+  let createtime = configgame[guildida].createtime;
   await channel.awaitMessages(async function(msg){
     if (msg.author.id == client.user.id) return;
     let themsg = await msg.content.toLowerCase();
@@ -877,8 +951,8 @@ async function startvote(channel,guildida, members){
             await channel.send(embed);
             //end set embed
 
-            if(totalvote === configgame[guildida].onsurvive && round === configgame[guildida].round){
-              await killperson(channel, guildida, members);
+            if(totalvote === configgame[guildida].onsurvive && round === configgame[guildida].round && createtime === configgame[guildida].createtime){
+              await killperson(channel, guildida, members,creattime);
               return;
             }
           }else{
@@ -895,12 +969,13 @@ async function startvote(channel,guildida, members){
       }
     }
   }, {time: 60000});
-  if(totalvote < configgame[guildida].onsurvive && round === configgame[guildida].round){
-    await killperson(channel, guildida, members);
+  if(totalvote < configgame[guildida].onsurvive && round === configgame[guildida].round && createtime === configgame[guildida].createtime){
+    await killperson(channel, guildida, members,creattime);
     return;
   }
   return;
 }
+
 
 
 client.login(process.env.BOT_TOKEN);
