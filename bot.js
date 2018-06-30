@@ -86,7 +86,7 @@ client.on('message', async (msg) => {
         });
         let embed = new Discord.RichEmbed()
           .setTitle("--Players in the game--")
-          .setDescription(`Player Counts: ⇨1⇦` + "\n" +"Send [Join] to join the game\n--------------------------------")
+          .setDescription(`Player Counts: ⇨`+"`1`"+`⇦` + "\n" +"Send [Join] to join the game\n--------------------------------")
           .addField(`Player1 (owner)`, msg.author.username)
           .setColor([0,120,255])
         msg.channel.send(embed);
@@ -103,7 +103,7 @@ client.on('message', async (msg) => {
           let gamedata = await readjson(`./${msg.guild.id}.json`);
           let embed = new Discord.RichEmbed()
             .setTitle("--Players in the game--")
-            .setDescription(`Player Counts: ⇨${configgame[msg.guild.id].playernumber}⇦` + "\n" +"Send [Join] to join the game\n--------------------------------")
+            .setDescription(`Player Counts: ⇨`+"`"+`${configgame[msg.guild.id].playernumber}`+"`"+`⇦` + "\n" +"Send [Join] to join the game\n--------------------------------")
             .setColor([0,120,255])
 
           for (i = 0; i < configgame[msg.guild.id].playernumber; i++) { 
@@ -157,7 +157,7 @@ client.on('message', async (msg) => {
             });
             let embed = new Discord.RichEmbed()
               .setTitle("--Players in the game--")
-              .setDescription(`Player Counts: ⇨${configgame[msg.guild.id].playernumber}⇦` + "\n" +"Send [Join] to join the game\n--------------------------------")
+              .setDescription(`Player Counts: ⇨`+"`"+`${configgame[msg.guild.id].playernumber}`+ "`" + "⇦\n" +"Send [Join] to join the game\n--------------------------------")
               .setColor([0,120,255])
 
             for (i = 0; i < configgame[msg.guild.id].playernumber; i++) { 
@@ -229,7 +229,7 @@ client.on('message', async (msg) => {
             
             await setallword(guildid, state[0], state[1]);
 
-            await msg.channel.send(":traffic_light: Loading...");
+            await msg.channel.send("Loading :traffic_light:");
 
             //await muteall(msg.channel,guildid,msg.guild.members);
 
@@ -494,7 +494,7 @@ async function setallword(guildidz, normal, spy){
 async function getword(){
   if (fs.existsSync("wordspackage.json")){
     let worddata = await readjson("wordspackage.json");
-    let suo = await getRandomInt(40);
+    let suo = await getRandomInt(60);
     console.log(`Import word${suo}`)
     let yin = await getRandomInt(2);
     if (yin == 1){
@@ -671,7 +671,7 @@ async function sendreview(channel, guildida,createtime){
   let gamedata = await readjson(`./${guildida}.json`);
   let embed = await new Discord.RichEmbed()
   .setTitle("--Discription Review--")
-  .setDescription(`Player Alive: ⇨${configgame[guildida].onsurvive}⇦` + "\n" +"--------------------------------")
+  .setDescription(`Player Alive: ⇨`+"`"+`${configgame[guildida].onsurvive}`+"`"+`⇦` + "\n" +"--------------------------------")
   .setColor([255,0,0])
   for (i = 0; i < configgame[guildida].playernumber; i++) { 
     if (gamedata[`player${i+1}`].out != "true"){
@@ -898,7 +898,7 @@ async function startvote(channel,guildida, members,creattime){
   let gamedata = await readjson(`./${guildida}.json`);
   let embed = await new Discord.RichEmbed()
   .setTitle("☠--Vote To Kill--☠")
-  .setDescription(`Player Alive: ⇨${configgame[guildida].onsurvive}⇦` + "\n" +"Send [Vote + Play Number](Ex: Vote1 to vote player 1!) to vote!\n--------------------------------")
+  .setDescription(`Player Alive: ⇨`+"`"+`${configgame[guildida].onsurvive}`+"`"+`⇦` + "\n" +"Send [Vote + Play Number](Ex: Vote1 to vote player 1!) to vote!\n--------------------------------")
   .setColor([255,255,0])
   for (i = 0; i < configgame[guildida].playernumber; i++) { 
     if (gamedata[`player${i+1}`].out != "true"){
@@ -939,7 +939,7 @@ async function startvote(channel,guildida, members,creattime){
             // set embed
             let embed = await new Discord.RichEmbed()
             .setTitle("☠--Vote To Kill--☠")
-            .setDescription(`Player Alive: ⇨${configgame[guildida].onsurvive}⇦` + "\n" +"Send [Vote + Play Number](Ex: Vote1 to vote player 1!) to vote!\n--------------------------------")
+            .setDescription(`Player Alive: ⇨`+"`"+`${configgame[guildida].onsurvive}`+"`"+`⇦` + "\n" +"Send [Vote + Play Number](Ex: Vote1 to vote player 1!) to vote!\n--------------------------------")
             .setColor([255,255,0])
             for (i = 0; i < configgame[guildida].playernumber; i++) { 
               if (gamedata[`player${i+1}`].out != "true"){
@@ -975,7 +975,6 @@ async function startvote(channel,guildida, members,creattime){
   }
   return;
 }
-
 
 
 client.login(process.env.BOT_TOKEN);
