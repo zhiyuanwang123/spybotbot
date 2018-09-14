@@ -380,7 +380,7 @@ async function startgame(guildid,channelid){
         let jsonsa = await JSON.stringify(gamedata,null,4);
         await writejson(`./${guildid}.json`,jsonsa);
         let theplayer = await theguild.members.get(gamedata[`player${i+1}`].player);
-        await theplayer.removeRole(role);
+        //await theplayer.removeRole(role);
         await theplayer.addRole(inplayer);
         await console.log("+1player");
       }
