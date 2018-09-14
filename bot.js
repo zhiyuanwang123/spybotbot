@@ -911,10 +911,13 @@ async function startvote(channel,guildida, members,creattime){
   let totalvote = 0;
   let round = configgame[guildida].round;
   let createtime = configgame[guildida].createtime;
+  var voting = true;
   await channel.awaitMessages(async function(msg){
     if (msg.author.id == client.user.id) return;
+    if (voting == false) return;
     let themsg = await msg.content.toLowerCase();
     if(themsg.search("vote") != -1 || themsg.search("voting") != -1){
+      
       var numbers = await themsg.match(/\d+/g).map(Number);
       if (numbers.length === 1){
         console.log(numbers[0]);
@@ -952,6 +955,7 @@ async function startvote(channel,guildida, members,creattime){
             //end set embed
 
             if(totalvote === configgame[guildida].onsurvive && round === configgame[guildida].round && createtime === configgame[guildida].createtime){
+              voting = false;
               await killperson(channel, guildida, members,creattime);
               return;
             }
