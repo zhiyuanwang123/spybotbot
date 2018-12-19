@@ -429,8 +429,21 @@ async function sendwordpic(word,dmplayer){
 }*/
 
 
-async function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max)+1);
+async function getRandomInt(max, res) {
+  if(res != 0){
+    return Math.floor(Math.random() * Math.floor(max)+1);
+  }else{
+    let num = Math.floor(Math.random() * Math.floor(max)+1);
+    if(num == res){
+      if (num == max){
+        return num-1;
+      }else if (num - 1 == 0){
+      return num + 1;
+      }
+    }else{
+      return num;
+    }//here
+  }
 }
 
 
@@ -448,8 +461,10 @@ async function setallword(guildidz, normal, spy){
   if (configgame[guildidz] != null){
     if(configgame[guildidz].created == true && fs.existsSync(`./${guildidz}.json`)){
       let igamedata = await readjson(`./${guildidz}.json`);
-      let spypos = await getRandomInt(configgame[guildidz].playernumber);
+      let spypos = await getRandomInt(configgame[guildidz].playernumber, 0); //here
+      let whites = await getRandomInt(configgame[guildidz].playernumber, spypos); //here
       console.log(`spy:${spypos}`);
+      let noword = "      ";
       for(i = 0; i < configgame[guildidz].playernumber; i++){
         if (i+1 != spypos){
           igamedata[`player${i+1}`] = {
@@ -472,7 +487,16 @@ async function setallword(guildidz, normal, spy){
             isspy: "true",
             out: igamedata[`player${i+1}`].out,
             votes: igamedata[`player${i+1}`].votes
-          }
+         }else if(i+1 == whites){
+           igamedata[`player${spypos}`] = {
+            player: igamedata[`player${i+1}`].player,
+            playername: igamedata[`player${i+1}`].playername,
+            role: igamedata[`player${i+1}`].role,
+            word: noword,
+            isspy: "true",
+            out: igamedata[`player${i+1}`].out,
+            votes: igamedata[`player${i+1}`].votes      
+         }
           let jsonsa = await JSON.stringify(igamedata,null,4);
           await writejson(`./${guildidz}.json`,jsonsa);
         }
@@ -494,9 +518,9 @@ async function setallword(guildidz, normal, spy){
 async function getword(){
   if (fs.existsSync("wordspackage.json")){
     let worddata = await readjson("wordspackage.json");
-    let suo = await getRandomInt(60);
+    let suo = await getRandomInt(60,0);
     console.log(`Import word${suo}`)
-    let yin = await getRandomInt(2);
+    let yin = await getRandomInt(2,0);
     if (yin == 1){
       let normal = worddata[`word${suo}`].a;
       let spyword = worddata[`word${suo}`].b;
